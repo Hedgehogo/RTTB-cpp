@@ -40,13 +40,13 @@ Where `{Decode}` is your trait and `{SomeResource}` is **some resource**.
 Example:
 ```cpp
 namespace rttb {
-    template<>
+	template<>
 	struct DecodePtr<int> {
-        template<typename Type_>
-        static DecodePtrReturn<::Decode, int, Type_*> decode(int resource) {
-            return ::Decode<Type_*>::decode(resource);
-        }
-    };
+		template<typename Type_>
+		static DecodePtrReturn<::Decode, int, Type_*> decode(int resource) {
+			return ::Decode<Type_*>::decode(resource);
+		}
+	};
 }
 ```
 
@@ -58,28 +58,72 @@ global wrappers for them, as well as shortcuts.
 If a type does not have your trait specialization, it is excluded from the sample, but does not 
 cause a compilation error even if it has names.
 
-### Function `Builder<{R}, {T}>::build()`
+### Function `rttb::Builder<{R}, {T}>::build()`
 Accepts a type name and **some resource**, returns an object of the type with that name or nothing if 
 no object could be constructed or no type with that name could be found.
 
-### Function `Builder<{R}, {T}>::implicit_build()`
-Accepts some resource, tries to determine a type name from that resource, and then calls 
-`Builder<{R}, {T}>::build()` with the name found and the resource that was passed to it.
+Example:
+```cpp
+orl::Option<Base*> object = rttb::Builder<int, Base>::builder().build("Derived", 10);
+```
 
-### Function `Builder<{R}, {T}>::add_type<{D}>()`
+### Function `rttb::Builder<{R}, {T}>::implicit_build()`
+Accepts some resource, tries to determine a type name from that resource, and then calls 
+`rttb::Builder<{R}, {T}>::build()` with the name found and the resource that was passed to it.
+
+Example:
+```cpp
+orl::Option<Base*> object = rttb::Builder<rttb::String, Base>::builder().implicit_build("This is Derived");
+```
+
+### Function `rttb::Builder<{R}, {T}>::add_type<{D}>()`
 Adds information that `{D}` is a descendant of `{T}`, if it is not, a compilation error will be generated.
 
-### Function `Builder<{R}, {T}>::add_fn()` 
+Example:
+```cpp
+rttb::Builder<rttb::String, Base>::builder().add_type<Derived>();
+```
+
+### Function `rttb::Builder<{R}, {T}>::add_fn()` 
 Accepts a function or lambda with the signature `orl::Option<Type_*>(rttb::String const&, {T})`. 
-This function will be called when `Builder<{R}, {T}>::build()` is called, if it returns something, 
+This function will be called when `rttb::Builder<{R}, {T}>::build()` is called, if it returns something, 
 it will be returned as an object. It should return nothing when the first argument is the name of 
 the added type.
 
-### Function `Builder<{R}, {T}>::add_name()`
-Adds a new name to the {T} type, if the `name` argument in the `Builder<{R}, {T}>::build()` 
+Example:
+```cpp
+rttb::Builder<int, Base>::builder().add_fn(
+	[](rttb::String const& name, int resource) -> orl::Option<Derived*> {
+		if(name == "FnDerived") {
+			return new Derived{resource};
+		}
+		return {};
+	}
+);
+```
+
+### Function `rttb::Builder<{R}, {T}>::add_name()`
+Adds a new name to the {T} type, if the `name` argument in the `rttb::Builder<{R}, {T}>::build()` 
 function matches it, an attempt will be made to create an instance of {T}.
 
-### Function `Builder<{R}, {T}>::add_determine()`
+Example:
+```cpp
+rttb::Builder<int, Derived>::builder().add_name("Derived");
+```
+
+### Function `rttb::Builder<{R}, {T}>::add_determine()`
 Accepts a function or lambda with the signature `orl::Option<String>({R})`. If during a call 
-to `Builder<{R}, {T}>::implicit_build()` this function returns a name, `Builder<{R}, {T}>>::build()` 
+to `rttb::Builder<{R}, {T}>::implicit_build()` this function returns a name, `rttb::Builder<{R}, {T}>>::build()` 
 will be called with that name as the first argument.
+
+Example:
+```cpp
+rttb::Builder<rttb::String, Derived>::builder().add_determine(
+	[](rttb::String resource) -> orl::Option<rttb::String> {
+		if(resource == "This is Derived") {
+			return {"Derived"};
+		}
+		return {};
+	}
+);
+```
