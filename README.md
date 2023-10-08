@@ -93,7 +93,7 @@ the added type.
 Example:
 ```cpp
 rttb::Builder<int, Base>::builder().add_fn(
-	[](rttb::String const& name, int resource) -> orl::Option<Derived*> {
+	[](rttb::String const& name, int resource) -> orl::Option<Base*> {
 		if(name == "FnDerived") {
 			return new Derived{resource};
 		}
@@ -118,7 +118,7 @@ will be called with that name as the first argument.
 
 Example:
 ```cpp
-rttb::Builder<rttb::String, Derived>::builder().add_determine(
+rttb::Builder<rttb::String, Base>::builder().add_determine(
 	[](rttb::String resource) -> orl::Option<rttb::String> {
 		if(resource == "This is Derived") {
 			return {"Derived"};
