@@ -1,10 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <variant>
 #include <functional>
 #include <absl/container/flat_hash_set.h>
 #include <absl/container/flat_hash_map.h>
 
+#include <RTTB/Cast/Cast.hpp>
 #include <RTTB/Decode/Decode.hpp>
 
 namespace rttb {
@@ -14,14 +16,34 @@ namespace rttb {
 	template<typename Resource_>
 	using DetermineFn = std::function<orl::Option<String>(Resource_)>;
 	
-	/// @brief Structure storing information about one derived type.
+	template<typename Resource_>
+	struct TypeData {
+		orl::Option<void*>(* build)(String const&, Resource_);
+		orl::Option<void*>(* implicit_build)(Resource_);
+		
+		TypeData(orl::Option<void*>(* build)(String const&, Resource_), orl::Option<void*>(* implicit_build)(Resource_));
+	};
+	
+	/// @brief Class storing information about one derived type.
 	///
 	/// @tparam Resource_ The resource on the basis of which an instance of the type is created.
 	/// @tparam Type_ Base type for derived type.
 	template<typename Resource_, typename Type_>
-	struct DerivedData {
-		BuildFn<Resource_, Type_> build;
-		orl::Option<Type_*>(* implicit_build)(Resource_ resource);
+	class DerivedData {
+	public:
+		using CastFn = Type_*(*)(void* derived);
+		using TypeData = TypeData<Resource_>;
+		
+		DerivedData(TypeData& type_data, CastFn cast_fn);
+		
+		DerivedData(BuildFn<Resource_, Type_> build_fn);
+		
+		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
+		
+		orl::Option<Type_*> implicit_build(Resource_ resource) const;
+		
+	protected:
+		std::variant<std::pair<TypeData*, CastFn>, BuildFn<Resource_, Type_> > data_;
 	};
 	
 	/// @brief A class that stores information about a single type.
@@ -32,6 +54,7 @@ namespace rttb {
 	class Builder {
 	public:
 		using BuildFn = BuildFn<Resource_, Type_>;
+		using TypeData = TypeData<Resource_>;
 		using DerivedData = DerivedData<Resource_, Type_>;
 		using DerivedContainer = std::vector<DerivedData>;
 		using NamesContainer = absl::flat_hash_set<String>;
@@ -81,17 +104,24 @@ namespace rttb {
 		/// @brief Returns a reference to the only existing instance of the class
 		static Builder<Resource_, Type_>& builder();
 		
+		TypeData& get_type_data();
+	
 	private:
-		Builder() = default;
+		Builder();
 		
 		Builder(const Builder&) = delete;
 		
 		Builder(Builder&&) = delete;
 		
+		static orl::Option<void*> build_fn(String const& name, Resource_ resource);
+		
+		static orl::Option<void*> implicit_build_fn(Resource_ resource);
+		
 		Builder& operator=(const Builder&) = delete;
 		
 		const Builder& operator=(const Builder&) const = delete;
 		
+		TypeData type_data_;
 		DerivedContainer derived_;
 		NamesContainer names_;
 		DetermineFnContainer determine_fn_;
