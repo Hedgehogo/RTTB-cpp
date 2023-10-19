@@ -16,11 +16,11 @@ namespace rttb {
 	template<typename Resource_>
 	using DetermineFn = std::function<orl::Option<String>(Resource_)>;
 	
-	template<typename Resource_>
+	template<typename Resource_, typename Type_>
 	struct TypeData {
-		using CastFn = orl::Option<void*> (*)(void* object, size_t type_id);
-		using BuildFn = orl::Option<void*> (*)(String const& name, Resource_ resource);
-		using ImplicitBuildFn = orl::Option<void*> (*)(Resource_ resource);
+		using CastFn = orl::Option<Type_*> (*)(void* object, size_t type_id);
+		using BuildFn = orl::Option<Type_*> (*)(String const& name, Resource_ resource);
+		using ImplicitBuildFn = orl::Option<Type_*> (*)(Resource_ resource);
 		
 		CastFn cast;
 		BuildFn build;
@@ -36,12 +36,12 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	class DerivedData {
 	public:
-		using CastFn = Type_* (*)(void* derived);
-		using TypeData = TypeData<Resource_>;
+		using TypeData = TypeData<Resource_, Type_>;
+		using BuildFn = BuildFn<Resource_, Type_>;
 		
-		DerivedData(TypeData& type_data, CastFn cast_fn);
+		DerivedData(TypeData type_data);
 		
-		DerivedData(BuildFn<Resource_, Type_> build_fn);
+		DerivedData(BuildFn build_fn);
 		
 		orl::Option<Type_*> cast(void* object, size_t type_id) const;
 		
@@ -50,7 +50,7 @@ namespace rttb {
 		orl::Option<Type_*> implicit_build(Resource_ resource) const;
 	
 	protected:
-		std::variant<std::pair<TypeData*, CastFn>, BuildFn<Resource_, Type_> > data_;
+		std::variant<TypeData , BuildFn> data_;
 	};
 	
 	/// @brief A class that stores information about a single type.
@@ -61,7 +61,6 @@ namespace rttb {
 	class Builder {
 	public:
 		using BuildFn = BuildFn<Resource_, Type_>;
-		using TypeData = TypeData<Resource_>;
 		using DerivedData = DerivedData<Resource_, Type_>;
 		using DerivedContainer = std::vector<DerivedData>;
 		using NamesContainer = absl::flat_hash_set<String>;
@@ -70,7 +69,9 @@ namespace rttb {
 		
 		size_t get_type_id();
 		
-		TypeData& get_type_data();
+		template<typename Base>
+		std::enable_if_t<std::is_base_of_v<Base, Type_>, TypeData<Resource_, Base> >
+		get_type_data();
 		
 		/// @brief Adds information about the existence of the derived type.
 		///
@@ -125,13 +126,16 @@ namespace rttb {
 		static Builder<Resource_, Type_>& builder();
 		
 	private:
-		static orl::Option<void*> cast_fn(void* object, size_t type_id);
+		template<typename Base>
+		static orl::Option<Base*> cast_fn(void* object, size_t type_id);
 		
-		static orl::Option<void*> build_fn(String const& name, Resource_ resource);
+		template<typename Base>
+		static orl::Option<Base*> build_fn(String const& name, Resource_ resource);
 		
-		static orl::Option<void*> implicit_build_fn(Resource_ resource);
+		template<typename Base>
+		static orl::Option<Base*> implicit_build_fn(Resource_ resource);
 		
-		Builder();
+		Builder() = default;
 		
 		Builder(const Builder&) = delete;
 		
@@ -141,7 +145,6 @@ namespace rttb {
 		
 		const Builder& operator=(const Builder&) const = delete;
 		
-		TypeData type_data_;
 		DerivedContainer derived_;
 		NamesContainer names_;
 		DetermineFnContainer determine_fn_;
