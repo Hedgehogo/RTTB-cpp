@@ -30,8 +30,18 @@ namespace rttb {
 	}
 	
 	template<typename Resource_>
-	TypeData<Resource_>::TypeData(orl::Option<void*> (* build)(const String&, Resource_), orl::Option<void*> (* implicit_build)(Resource_)) :
-		build(build), implicit_build(implicit_build) {
+	TypeData<Resource_>::TypeData(CastFn cast, BuildFn build, ImplicitBuildFn implicit_build) :
+		cast(cast), build(build), implicit_build(implicit_build) {
+	}
+	
+	template<typename Resource_, typename Type_>
+	size_t Builder<Resource_, Type_>::get_type_id() {
+		return reinterpret_cast<size_t>(this);
+	}
+	
+	template<typename Resource_, typename Type_>
+	TypeData<Resource_>& Builder<Resource_, Type_>::get_type_data() {
+		return type_data_;
 	}
 	
 	template<typename Resource_, typename Type_>
@@ -42,6 +52,16 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	DerivedData<Resource_, Type_>::DerivedData(BuildFn<Resource_, Type_> build_fn) :
 		data_(std::move(build_fn)) {
+	}
+	
+	template<typename Resource_, typename Type_>
+	orl::Option<Type_*> DerivedData<Resource_, Type_>::cast(void* object, size_t type_id) const {
+		if(auto type_data{std::get_if<0>(&data_)}) {
+			if(auto result{type_data->first->cast(object, type_id)}) {
+				return {type_data->second(result.some())};
+			}
+		}
+		return {};
 	}
 	
 	template<typename Resource_, typename Type_>
@@ -68,7 +88,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	Builder<Resource_, Type_>::Builder() : type_data_(build_fn, implicit_build_fn) {
+	Builder<Resource_, Type_>::Builder() : type_data_(cast_fn, build_fn, implicit_build_fn) {
 	}
 	
 	template<typename Resource_, typename Type_>
@@ -94,6 +114,19 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	void Builder<Resource_, Type_>::add_determine(DetermineFn determine_fn) {
 		determine_fn_.push_back(determine_fn);
+	}
+	
+	template<typename Resource_, typename Type_>
+	orl::Option<Type_*> Builder<Resource_, Type_>::cast(void* object, size_t type_id) {
+		if(type_id == get_type_id()) {
+			return reinterpret_cast<Type_*>(object);
+		}
+		for(const auto& item: derived_) {
+			if(auto result{item.cast(object, type_id)}) {
+				return result;
+			}
+		}
+		return {};
 	}
 	
 	template<typename Resource_, typename Type_>
@@ -133,8 +166,11 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	TypeData<Resource_>& Builder<Resource_, Type_>::get_type_data() {
-		return type_data_;
+	orl::Option<void*> Builder<Resource_, Type_>::cast_fn(void* object, size_t type_id) {
+		if(auto result{builder().cast(object, type_id)}) {
+			return {reinterpret_cast<void*>(result.some())};
+		}
+		return {};
 	}
 	
 	template<typename Resource_, typename Type_>

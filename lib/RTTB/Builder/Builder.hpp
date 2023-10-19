@@ -18,10 +18,15 @@ namespace rttb {
 	
 	template<typename Resource_>
 	struct TypeData {
-		orl::Option<void*>(* build)(String const&, Resource_);
-		orl::Option<void*>(* implicit_build)(Resource_);
+		using CastFn = orl::Option<void*> (*)(void* object, size_t type_id);
+		using BuildFn = orl::Option<void*> (*)(String const& name, Resource_ resource);
+		using ImplicitBuildFn = orl::Option<void*> (*)(Resource_ resource);
 		
-		TypeData(orl::Option<void*>(* build)(String const&, Resource_), orl::Option<void*>(* implicit_build)(Resource_));
+		CastFn cast;
+		BuildFn build;
+		ImplicitBuildFn implicit_build;
+		
+		TypeData(CastFn cast, BuildFn build, ImplicitBuildFn implicit_build);
 	};
 	
 	/// @brief Class storing information about one derived type.
@@ -31,17 +36,19 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	class DerivedData {
 	public:
-		using CastFn = Type_*(*)(void* derived);
+		using CastFn = Type_* (*)(void* derived);
 		using TypeData = TypeData<Resource_>;
 		
 		DerivedData(TypeData& type_data, CastFn cast_fn);
 		
 		DerivedData(BuildFn<Resource_, Type_> build_fn);
 		
+		orl::Option<Type_*> cast(void* object, size_t type_id) const;
+		
 		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
 		
 		orl::Option<Type_*> implicit_build(Resource_ resource) const;
-		
+	
 	protected:
 		std::variant<std::pair<TypeData*, CastFn>, BuildFn<Resource_, Type_> > data_;
 	};
@@ -60,6 +67,10 @@ namespace rttb {
 		using NamesContainer = absl::flat_hash_set<String>;
 		using DetermineFn = DetermineFn<Resource_>;
 		using DetermineFnContainer = std::vector<DetermineFn>;
+		
+		size_t get_type_id();
+		
+		TypeData& get_type_data();
 		
 		/// @brief Adds information about the existence of the derived type.
 		///
@@ -86,6 +97,15 @@ namespace rttb {
 		/// @param determine_fn Determine function.
 		void add_determine(DetermineFn determine_fn);
 		
+		/// @brief Performs a type check and returns a pointer if the check succeeds.
+		///	@note If you store an object of unknown type, don't forget to take care of its correct deletion.
+		///
+		/// @param object Void pointer to an object of unknown type.
+		/// @param type_id Type id.
+		///
+		/// @return Pointer to an object or nothing.
+		orl::Option<Type_*> cast(void* object, size_t type_id);
+		
 		/// @brief Constructs an instance of the type by type name from the resource.
 		///
 		/// @param name Type name.
@@ -104,18 +124,18 @@ namespace rttb {
 		/// @brief Returns a reference to the only existing instance of the class
 		static Builder<Resource_, Type_>& builder();
 		
-		TypeData& get_type_data();
-	
 	private:
+		static orl::Option<void*> cast_fn(void* object, size_t type_id);
+		
+		static orl::Option<void*> build_fn(String const& name, Resource_ resource);
+		
+		static orl::Option<void*> implicit_build_fn(Resource_ resource);
+		
 		Builder();
 		
 		Builder(const Builder&) = delete;
 		
 		Builder(Builder&&) = delete;
-		
-		static orl::Option<void*> build_fn(String const& name, Resource_ resource);
-		
-		static orl::Option<void*> implicit_build_fn(Resource_ resource);
 		
 		Builder& operator=(const Builder&) = delete;
 		
