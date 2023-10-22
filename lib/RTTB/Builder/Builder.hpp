@@ -8,6 +8,7 @@
 
 #include <RTTB/Cast/Cast.hpp>
 #include <RTTB/Decode/Decode.hpp>
+#include <RTTB/Dyn/Dyn.hpp>
 
 namespace rttb {
 	template<typename Resource_, typename Type_>
@@ -18,7 +19,7 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	struct TypeData {
-		using CastFn = orl::Option<Type_*> (*)(void* object, size_t type_id);
+		using CastFn = orl::Option<Type_*> (*)(Dyn& ptr);
 		using BuildFn = orl::Option<Type_*> (*)(String const& name, Resource_ resource);
 		using ImplicitBuildFn = orl::Option<Type_*> (*)(Resource_ resource);
 		
@@ -43,7 +44,7 @@ namespace rttb {
 		
 		DerivedData(BuildFn build_fn);
 		
-		orl::Option<Type_*> cast(void* object, size_t type_id) const;
+		orl::Option<Type_*> cast(Dyn& ptr) const;
 		
 		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
 		
@@ -66,18 +67,19 @@ namespace rttb {
 		using NamesContainer = absl::flat_hash_set<String>;
 		using DetermineFn = DetermineFn<Resource_>;
 		using DetermineFnContainer = std::vector<DetermineFn>;
-		
-		size_t get_type_id();
+		template<typename Base, typename Return>
+		using if_base_t = std::enable_if_t<std::is_base_of_v<Base, Type_>, Return>;
+		template<typename Derived, typename Return>
+		using if_derived_t = std::enable_if_t<std::is_base_of_v<Type_, Derived>, Return>;
 		
 		template<typename Base>
-		std::enable_if_t<std::is_base_of_v<Base, Type_>, TypeData<Resource_, Base> >
-		get_type_data();
+		if_base_t<Base, TypeData<Resource_, Base> > get_type_data();
 		
 		/// @brief Adds information about the existence of the derived type.
 		///
 		/// @tparam Derived Derived type.
 		template<typename Derived>
-		std::enable_if_t<std::is_base_of_v<Type_, Derived>, void> add_type();
+		if_derived_t<Derived, void> add_type();
 		
 		/// @brief Adds a function that can construct a type.
 		///
@@ -99,13 +101,11 @@ namespace rttb {
 		void add_determine(DetermineFn determine_fn);
 		
 		/// @brief Performs a type check and returns a pointer if the check succeeds.
-		///	@note If you store an object of unknown type, don't forget to take care of its correct deletion.
 		///
-		/// @param object Void pointer to an object of unknown type.
-		/// @param type_id Type id.
+		/// @param ptr Dyn pointer to an object.
 		///
 		/// @return Pointer to an object or nothing.
-		orl::Option<Type_*> cast(void* object, size_t type_id);
+		orl::Option<Type_*> cast(Dyn& ptr) const;
 		
 		/// @brief Constructs an instance of the type by type name from the resource.
 		///
@@ -113,21 +113,21 @@ namespace rttb {
 		/// @param resource Resource from which an instance of the type is constructed.
 		///
 		/// @return An instance of the class or nothing in case of failure.
-		orl::Option<Type_*> build(String const& name, Resource_ resource);
+		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
 		
 		/// @brief Constructs an instance of a type from a resource, attempting to determine a type based on the resource.
 		///
 		/// @param resource Resource from which an instance of the type is constructed.
 		///
 		/// @return An instance of the class or nothing in case of failure.
-		orl::Option<Type_*> implicit_build(Resource_ resource);
+		orl::Option<Type_*> implicit_build(Resource_ resource) const;
 		
 		/// @brief Returns a reference to the only existing instance of the class
 		static Builder<Resource_, Type_>& builder();
 		
 	private:
 		template<typename Base>
-		static orl::Option<Base*> cast_fn(void* object, size_t type_id);
+		static orl::Option<Base*> cast_fn(Dyn& ptr);
 		
 		template<typename Base>
 		static orl::Option<Base*> build_fn(String const& name, Resource_ resource);
