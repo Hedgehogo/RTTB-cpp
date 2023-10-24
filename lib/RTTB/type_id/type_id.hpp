@@ -9,7 +9,7 @@ namespace rttb {
 	///
 	/// @return Unique identifier of type.
 	template<typename Type_>
-	constexpr size_t type_id();
+	size_t type_id();
 }
 
 #include "type_id.inl"
