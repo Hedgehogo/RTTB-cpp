@@ -7,6 +7,8 @@
 #include <RTTB/type_id/type_id.hpp>
 
 namespace rttb {
+	/// @brief A class storing (owning) an object of any type.
+	/// @note To get the object inside, use Builder<R, T>::cast()
 	class Dyn {
 	public:
 		using DestroyFn = void(*)(void* ptr);
