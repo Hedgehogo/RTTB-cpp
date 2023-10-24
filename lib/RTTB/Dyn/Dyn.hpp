@@ -22,6 +22,8 @@ namespace rttb {
 		
 		~Dyn();
 		
+		size_t get_type_id() const;
+		
 		Dyn& operator=(Dyn const& other) = delete;
 		
 		Dyn& operator=(Dyn&& other);

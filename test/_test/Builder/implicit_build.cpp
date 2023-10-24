@@ -13,7 +13,7 @@ TEST(Builder, implicit_build) {
 	{
 		auto object = rttb::Builder<int, Base>::builder().implicit_build(27);
 		ASSERT_TRUE(object.is_some());
-		ASSERT_EQ(object.except()->name(), "SuperDerived27");
+		ASSERT_EQ(object.except()->name(), "SuperDerived-27");
 		delete object.except();
 	}
 }

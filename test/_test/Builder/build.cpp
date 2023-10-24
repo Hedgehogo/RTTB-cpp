@@ -20,7 +20,7 @@ TEST(Builder, build) {
 	{
 		auto object = rttb::Builder<int, Base>::builder().build("SuperDerived", 10);
 		ASSERT_TRUE(object.is_some());
-		ASSERT_EQ(object.except()->name(), "SuperDerived10");
+		ASSERT_EQ(object.except()->name(), "SuperDerived-10");
 		delete object.except();
 	}
 	
@@ -39,7 +39,7 @@ TEST(Builder, build) {
 	{
 		auto object = rttb::Builder<int, Base>::builder().build("FnDerived", 10);
 		ASSERT_TRUE(object.is_some());
-		ASSERT_EQ(object.except()->name(), "SuperDerived110");
+		ASSERT_EQ(object.except()->name(), "SuperDerived-110");
 		delete object.except();
 	}
 	

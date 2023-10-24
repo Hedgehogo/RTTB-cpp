@@ -19,4 +19,8 @@ namespace rttb {
 	
 	void Dyn::not_destroy(void* object) {
 	}
+	
+	size_t Dyn::get_type_id() const {
+		return type_id_;
+	}
 }

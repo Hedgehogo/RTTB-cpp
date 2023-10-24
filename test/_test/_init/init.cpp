@@ -19,14 +19,14 @@ orl::Option<Derived*> Decode<Derived*>::decode(int resource) {
 }
 
 std::string OtherBase::other_name() {
-	return "Base";
+	return "OtherBase";
 }
 
 SuperDerived::SuperDerived(int g) : Derived(g) {
 }
 
 std::string SuperDerived::name() {
-	return std::string("SuperDerived") + std::to_string(g);
+	return std::string("SuperDerived-") + std::to_string(g);
 }
 
 std::string SuperDerived::other_name() {
