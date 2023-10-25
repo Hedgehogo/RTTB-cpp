@@ -1,6 +1,6 @@
 #pragma once
 
-#include <option_result/option_result.hpp>
+#include <optional>
 
 namespace rttb {
 	/// @brief Structure containing functions of conversion from a derived class, passed as void*, to a base class.

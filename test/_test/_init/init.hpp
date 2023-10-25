@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <RTTB/Builder/Builder.hpp>
 
 class Base {
@@ -40,28 +41,28 @@ public:
 template<typename T>
 class TemplateBase {
 public:
-	TemplateBase(orl::Option<TemplateBase<T>*> part) :
+	TemplateBase(std::optional<TemplateBase<T>*> part) :
 		part(std::move(part)) {
 	}
 	
-	orl::Option<TemplateBase<T>*>& get_part() {
+	std::optional<TemplateBase<T>*>& get_part() {
 		return part;
 	}
 	
 	virtual ~TemplateBase() {
 		if(part) {
-			delete part.some();
+			delete part.value();
 		}
 	}
 
 private:
-	orl::Option<TemplateBase<T>*> part;
+	std::optional<TemplateBase<T>*> part;
 };
 
 template<typename T>
 class TemplateDerived : Base, public TemplateBase<T> {
 public:
-	TemplateDerived(int g, orl::Option<TemplateBase<T>*> part) :
+	TemplateDerived(int g, std::optional<TemplateBase<T>*> part) :
 		Base(g), TemplateBase<T>(std::move(part)) {
 	}
 };

@@ -28,7 +28,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> DerivedData<Resource_, Type_>::cast(Dyn& ptr) const {
+	std::optional<Type_*> DerivedData<Resource_, Type_>::cast(Dyn& ptr) const {
 		return data_.cast(ptr);
 	}
 	
@@ -39,7 +39,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> Builder<Resource_, Type_>::cast(Dyn& ptr) const {
+	std::optional<Type_*> Builder<Resource_, Type_>::cast(Dyn& ptr) const {
 		if(ptr.type_id_ == type_id<Type_>()) {
 			return {reinterpret_cast<Type_*>(ptr.ptr_)};
 		}
@@ -53,9 +53,9 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<Base*> Builder<Resource_, Type_>::cast_fn(Dyn& ptr) {
+	std::optional<Base*> Builder<Resource_, Type_>::cast_fn(Dyn& ptr) {
 		if(auto result{builder().cast(ptr)}) {
-			return {result.some()};
+			return {result.value()};
 		}
 		return {};
 	}

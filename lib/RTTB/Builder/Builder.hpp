@@ -3,8 +3,6 @@
 #include <vector>
 #include <variant>
 #include <functional>
-#include <absl/container/flat_hash_set.h>
-#include <absl/container/flat_hash_map.h>
 
 #include <RTTB/Cast/Cast.hpp>
 #include <RTTB/Dyn/Dyn.hpp>
@@ -12,7 +10,7 @@
 namespace rttb {
 	template<typename Resource_, typename Type_>
 	struct TypeData {
-		using CastFn = orl::Option<Type_*> (*)(Dyn& ptr);
+		using CastFn = std::optional<Type_*> (*)(Dyn& ptr);
 		
 		CastFn cast;
 		
@@ -30,7 +28,7 @@ namespace rttb {
 		
 		DerivedData(TypeData type_data);
 		
-		orl::Option<Type_*> cast(Dyn& ptr) const;
+		std::optional<Type_*> cast(Dyn& ptr) const;
 		
 	protected:
 		TypeData data_;
@@ -64,14 +62,14 @@ namespace rttb {
 		/// @param ptr Dyn pointer to an object.
 		///
 		/// @return Pointer to an object or nothing.
-		orl::Option<Type_*> cast(Dyn& ptr) const;
+		std::optional<Type_*> cast(Dyn& ptr) const;
 		
 		/// @brief Returns a reference to the only existing instance of the class
 		static Builder<Resource_, Type_>& builder();
 		
 	private:
 		template<typename Base>
-		static orl::Option<Base*> cast_fn(Dyn& ptr);
+		static std::optional<Base*> cast_fn(Dyn& ptr);
 		
 		Builder() = default;
 		
