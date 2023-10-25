@@ -1,7 +1,5 @@
 //included into Builder.hpp
 
-#include <RTTB/type_id/type_id.hpp>
-
 namespace rttb {
 	template<typename Resource_, typename Type_>
 	TypeData<Resource_, Type_>::TypeData(CastFn cast, BuildFn build, ImplicitBuildFn implicit_build) :
@@ -80,7 +78,7 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> Builder<Resource_, Type_>::cast(Dyn& ptr) const {
-		if(ptr.type_id_ == type_id<Type_>()) {
+		if(ptr.type_index_ == std::type_index{typeid(Type_)}) {
 			return {reinterpret_cast<Type_*>(ptr.ptr_)};
 		}
 		for(const auto& item: derived_) {

@@ -3,8 +3,7 @@
 #include <cstddef>
 #include <utility>
 #include <type_traits>
-
-#include <RTTB/type_id/type_id.hpp>
+#include <typeindex>
 
 namespace rttb {
 	/// @brief A class storing (owning) an object of any type.
@@ -22,7 +21,7 @@ namespace rttb {
 		
 		~Dyn();
 		
-		size_t get_type_id() const;
+		std::type_index get_type_index() const;
 		
 		Dyn& operator=(Dyn const& other) = delete;
 		
@@ -38,7 +37,7 @@ namespace rttb {
 		friend struct Builder;
 		
 		void* ptr_;
-		size_t type_id_;
+		std::type_index type_index_;
 		DestroyFn destroy_fn_;
 	};
 }
