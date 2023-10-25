@@ -3,34 +3,6 @@
 #include <RTTB/type_id/type_id.hpp>
 
 namespace rttb {
-	namespace detail {
-		template<typename Resource, typename Base, typename Derived>
-		orl::Option<Base*> build(String const& name, Resource resource) {
-			if(auto result{Builder<Resource, Derived>::builder().build(name, std::forward<Resource>(resource))}) {
-				return {result.some()};
-			}
-			return {};
-		}
-		
-		template<typename Resource, typename Base, typename Derived>
-		orl::Option<Base*> implicit_build(Resource resource) {
-			if(auto result{Builder<Resource, Derived>::builder().implicit_build(std::forward<Resource>(resource))}) {
-				return {result.some()};
-			}
-			return {};
-		}
-		
-		template<typename Resource, typename Base>
-		orl::Option<Base*> empty_implicit_build(Resource resource) {
-			return {};
-		}
-		
-		template<typename Base>
-		orl::Option<Base*> empty_option_cast(void* derived) {
-			return {};
-		}
-	}
-	
 	template<typename Resource_, typename Type_>
 	TypeData<Resource_, Type_>::TypeData(CastFn cast, BuildFn build, ImplicitBuildFn implicit_build) :
 		cast(cast), build(build), implicit_build(implicit_build) {
