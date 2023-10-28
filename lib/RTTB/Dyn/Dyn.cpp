@@ -1,7 +1,7 @@
 #include "Dyn.hpp"
 
 namespace rttb {
-	Dyn::Dyn(Dyn&& other) : ptr_(other.ptr_), type_index_(other.type_index_), destroy_fn_(other.destroy_fn_) {
+	Dyn::Dyn(Dyn&& other) : ptr_(other.ptr_), type_id_(other.type_id_), destroy_fn_(other.destroy_fn_) {
 		other.destroy_fn_ = not_destroy;
 	}
 	
@@ -11,7 +11,7 @@ namespace rttb {
 	
 	Dyn& Dyn::operator=(Dyn&& other) {
 		ptr_ = other.ptr_;
-		type_index_ = other.type_index_;
+		type_id_ = other.type_id_;
 		destroy_fn_ = other.destroy_fn_;
 		other.destroy_fn_ = not_destroy;
 		return *this;
@@ -20,7 +20,7 @@ namespace rttb {
 	void Dyn::not_destroy(void* object) {
 	}
 	
-	std::type_index Dyn::get_type_index() const {
-		return type_index_;
+	size_t Dyn::get_type_id() const {
+		return type_id_;
 	}
 }

@@ -78,7 +78,7 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> Builder<Resource_, Type_>::cast(Dyn& ptr) const {
-		if(ptr.type_index_ == std::type_index{typeid(Type_)}) {
+		if(ptr.type_id_ == type_id<Type_>()) {
 			return {reinterpret_cast<Type_*>(ptr.ptr_)};
 		}
 		for(const auto& item: derived_) {

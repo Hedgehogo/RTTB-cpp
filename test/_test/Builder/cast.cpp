@@ -8,7 +8,7 @@ TEST(Builder, cast) {
 	{
 		rttb::Dyn object{SuperDerived{15}};
 		auto result = rttb::Builder<int, SuperDerived>::builder().cast(object);
-		ASSERT_EQ(object.get_type_index(), std::type_index{typeid(SuperDerived)});
+		ASSERT_EQ(object.get_type_id(), rttb::type_id<SuperDerived>());
 		ASSERT_TRUE(result.is_some());
 		ASSERT_EQ(result.except()->name(), "SuperDerived-15");
 		ASSERT_EQ(result.except()->other_name(), "SuperDerived");
@@ -17,7 +17,7 @@ TEST(Builder, cast) {
 	{
 		rttb::Dyn object{SuperDerived{15}};
 		auto result = rttb::Builder<int, Derived>::builder().cast(object);
-		ASSERT_EQ(object.get_type_index(), std::type_index{typeid(SuperDerived)});
+		ASSERT_EQ(object.get_type_id(), rttb::type_id<SuperDerived>());
 		ASSERT_TRUE(result.is_some());
 		ASSERT_EQ(result.except()->name(), "SuperDerived-15");
 	}
@@ -25,7 +25,7 @@ TEST(Builder, cast) {
 	{
 		rttb::Dyn object{SuperDerived{15}};
 		auto result = rttb::Builder<int, OtherBase>::builder().cast(object);
-		ASSERT_EQ(object.get_type_index(), std::type_index{typeid(SuperDerived)});
+		ASSERT_EQ(object.get_type_id(), rttb::type_id<SuperDerived>());
 		ASSERT_TRUE(result.is_some());
 		ASSERT_EQ(result.except()->other_name(), "SuperDerived");
 	}
@@ -33,7 +33,7 @@ TEST(Builder, cast) {
 	{
 		rttb::Dyn object{Derived{15}};
 		auto result = rttb::Builder<int, SuperDerived>::builder().cast(object);
-		ASSERT_EQ(object.get_type_index(), std::type_index{typeid(Derived)});
+		ASSERT_EQ(object.get_type_id(), rttb::type_id<Derived>());
 		ASSERT_FALSE(result.is_some());
 	}
 }
