@@ -10,7 +10,7 @@ namespace rttb {
 	template<>
 	struct DecodePtr<int> {
 		template<typename Type_>
-		static DecodePtrReturn<::Decode, int, Type_*> decode(int resource) {
+		static DecodePtrReturn<::Decode<Type_*>, int, Type_*> decode(int resource) {
 			return ::Decode<Type_*>::decode(resource);
 		}
 	};

@@ -54,10 +54,10 @@ namespace rttb {
 		template<typename Resource_, typename Type_>
 		constexpr auto has_decode_ptr_v = has_decode_ptr<Resource_, Type_>::value;
 		
-		template<template<typename Type> typename Decode_, typename Resource_>
+		template<typename Resource_>
 		struct HasDecodeHelper {
-			template<typename Type_>
-			static auto has_decode(Type_&&) -> decltype(Decode_<Type_>::decode(std::declval<Resource_>()), std::true_type{}) {
+			template<typename Decode_>
+			static auto has_decode(Decode_&&) -> decltype(Decode_::decode(std::declval<Resource_>()), std::true_type{}) {
 				return {};
 			};
 			
@@ -66,13 +66,13 @@ namespace rttb {
 			};
 		};
 		
-		template<template<typename Type> typename Decode_, typename Resource_, typename Type_>
-		using has_decode = decltype(HasDecodeHelper<Decode_, Resource_>::has_decode(std::declval<Type_>()));
+		template<typename Decode_, typename Resource_>
+		using has_decode = decltype(HasDecodeHelper<Resource_>::has_decode(std::declval<Decode_>()));
 		
-		template<template<typename Type> typename Decode_, typename Resource_, typename Type_>
-		constexpr bool has_decode_v = detail::has_decode<Decode_, Resource_, Type_>::value;
+		template<typename Decode_, typename Resource_>
+		constexpr bool has_decode_v = detail::has_decode<Decode_, Resource_>::value;
 	}
 	
-	template<template<typename Type> typename Decode_, typename Resource_, typename Type_>
-	using DecodePtrReturn = std::enable_if_t<detail::has_decode_v<Decode_, int, Type_>, orl::Option<Type_> >;
+	template<typename Decode_, typename Resource_, typename Type_>
+	using DecodePtrReturn = std::enable_if_t<detail::has_decode_v<Decode_, Resource_>, orl::Option<Type_> >;
 }

@@ -29,8 +29,8 @@ namespace rttb {
 	template<>
 	struct DecodePtr<{SomeResource}> {
 		template<typename Type_>
-		static DecodePtrReturn<::{Decode}, {SomeResource}, Type_{*?}> decode({SomeResource} resource) {
-			return ::{Decode}<Type_{*?}>::decode(resource);
+		static DecodePtrReturn<{Decode}, {SomeResource}, Type_{*?}> decode({SomeResource} resource) {
+			return {Decode}::decode(resource);
 		}
 	};
 }
@@ -43,7 +43,7 @@ namespace rttb {
 	template<>
 	struct DecodePtr<int> {
 		template<typename Type_>
-		static DecodePtrReturn<::Decode, int, Type_*> decode(int resource) {
+		static DecodePtrReturn<::Decode<Type*>, int, Type_*> decode(int resource) {
 			return ::Decode<Type_*>::decode(resource);
 		}
 	};
