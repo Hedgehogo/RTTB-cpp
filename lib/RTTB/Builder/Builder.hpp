@@ -75,6 +75,11 @@ namespace rttb {
 		template<typename Base>
 		if_base_t<Base, TypeData<Resource_, Base> > get_type_data();
 		
+		/// @brief Gets the set of names associated with the type
+		///
+		/// @return Set of names.
+		NamesContainer const& get_names();
+		
 		/// @brief Adds information about the existence of the derived type.
 		///
 		/// @tparam Derived Derived type.

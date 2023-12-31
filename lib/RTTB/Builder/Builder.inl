@@ -24,6 +24,11 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
+	typename Builder<Resource_, Type_>::NamesContainer const& Builder<Resource_, Type_>::get_names() {
+		return names_;
+	}
+	
+	template<typename Resource_, typename Type_>
 	template<typename Derived>
 	typename Builder<Resource_, Type_>::template if_derived_t<Derived, void>
 	Builder<Resource_, Type_>::add_type() {
