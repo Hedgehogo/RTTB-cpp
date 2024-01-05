@@ -41,11 +41,11 @@ namespace rttb {
 			template<typename Type_>
 			static auto has_decode_ptr(Type_&&) -> decltype(DecodePtr<Resource_>::template decode<Type_>(std::declval<Resource_>()), std::true_type{}) {
 				return {};
-			};
+			}
 			
 			[[maybe_unused]] static std::false_type has_decode_ptr(...) {
 				return {};
-			};
+			}
 		};
 		
 		template<typename Resource_, typename Type_>
@@ -59,11 +59,11 @@ namespace rttb {
 			template<typename Decode_>
 			static auto has_decode(Decode_&&) -> decltype(Decode_::decode(std::declval<Resource_>()), std::true_type{}) {
 				return {};
-			};
+			}
 			
 			[[maybe_unused]] static std::false_type has_decode(...) {
 				return {};
-			};
+			}
 		};
 		
 		template<typename Decode_, typename Resource_>
