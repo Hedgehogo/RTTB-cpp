@@ -20,8 +20,8 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	struct TypeData {
 		using CastFn = orl::Option<Type_*> (*)(Dyn& ptr);
-		using BuildFn = orl::Option<Type_*> (*)(String const& name, Resource_ resource);
-		using ImplicitBuildFn = orl::Option<Type_*> (*)(Resource_ resource);
+		using BuildFn = orl::Option<std::pair<size_t, Type_*> > (*)(String const& name, Resource_ resource);
+		using ImplicitBuildFn = orl::Option<std::pair<size_t, Type_*> > (*)(Resource_ resource);
 		
 		CastFn cast;
 		BuildFn build;
@@ -46,9 +46,9 @@ namespace rttb {
 		
 		orl::Option<Type_*> cast(Dyn& ptr) const;
 		
-		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
+		orl::Option<std::pair<size_t, Type_*> > build(String const& name, Resource_ resource) const;
 		
-		orl::Option<Type_*> implicit_build(Resource_ resource) const;
+		orl::Option<std::pair<size_t, Type_*> > implicit_build(Resource_ resource) const;
 	
 	protected:
 		std::variant<TypeData , BuildFn> data_;
@@ -135,10 +135,10 @@ namespace rttb {
 		static orl::Option<Base*> cast_fn(Dyn& ptr);
 		
 		template<typename Base>
-		static orl::Option<Base*> build_fn(String const& name, Resource_ resource);
+		static orl::Option<std::pair<size_t, Base*> > build_fn(String const& name, Resource_ resource);
 		
 		template<typename Base>
-		static orl::Option<Base*> implicit_build_fn(Resource_ resource);
+		static orl::Option<std::pair<size_t, Base*> > implicit_build_fn(Resource_ resource);
 		
 		Builder() = default;
 		
