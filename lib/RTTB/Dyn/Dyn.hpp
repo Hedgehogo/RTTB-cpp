@@ -30,12 +30,18 @@ namespace rttb {
 		
 	private:
 		template<typename T>
+		Dyn(T* ptr);
+		
+		template<typename T>
 		static void destroy(void* object);
 		
 		static void not_destroy(void* object);
 		
 		template<typename Resource_, typename Type_>
-		friend struct Builder;
+		friend class DerivedData;
+		
+		template<typename Resource_, typename Type_>
+		friend class Builder;
 		
 		void* ptr_;
 		size_t type_id_;

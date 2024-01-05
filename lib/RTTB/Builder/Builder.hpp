@@ -21,13 +21,23 @@ namespace rttb {
 	struct TypeData {
 		using CastFn = orl::Option<Type_*> (*)(Dyn& ptr);
 		using BuildFn = orl::Option<Type_*> (*)(String const& name, Resource_ resource);
+		using BuildDynFn = orl::Option<Dyn> (*)(String const& name, Resource_ resource);
 		using ImplicitBuildFn = orl::Option<Type_*> (*)(Resource_ resource);
+		using ImplicitBuildDynFn = orl::Option<Dyn> (*)(Resource_ resource);
 		
 		CastFn cast;
 		BuildFn build;
+		BuildDynFn build_dyn;
 		ImplicitBuildFn implicit_build;
+		ImplicitBuildDynFn implicit_build_dyn;
 		
-		TypeData(CastFn cast, BuildFn build, ImplicitBuildFn implicit_build);
+		TypeData(
+			CastFn cast,
+			BuildFn build,
+			BuildDynFn build_dyn,
+			ImplicitBuildFn implicit_build,
+			ImplicitBuildDynFn implicit_build_dyn
+		);
 	};
 	
 	/// @brief Class storing information about one derived type.
@@ -48,10 +58,14 @@ namespace rttb {
 		
 		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
 		
+		orl::Option<Dyn> build_dyn(String const& name, Resource_ resource) const;
+		
 		orl::Option<Type_*> implicit_build(Resource_ resource) const;
+		
+		orl::Option<Dyn> implicit_build_dyn(Resource_ resource) const;
 	
 	protected:
-		std::variant<TypeData , BuildFn> data_;
+		std::variant<TypeData, BuildFn> data_;
 	};
 	
 	/// @brief A class that stores information about a single type.
@@ -120,6 +134,14 @@ namespace rttb {
 		/// @return An instance of the class or nothing in case of failure.
 		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
 		
+		/// @brief Constructs an instance of the type by type name from the resource.
+		///
+		/// @param name Type name.
+		/// @param resource Resource from which an instance of the type is constructed.
+		///
+		/// @return An instance of the class or nothing in case of failure.
+		orl::Option<Dyn> build_dyn(String const& name, Resource_ resource) const;
+		
 		/// @brief Constructs an instance of a type from a resource, attempting to determine a type based on the resource.
 		///
 		/// @param resource Resource from which an instance of the type is constructed.
@@ -127,9 +149,16 @@ namespace rttb {
 		/// @return An instance of the class or nothing in case of failure.
 		orl::Option<Type_*> implicit_build(Resource_ resource) const;
 		
+		/// @brief Constructs an instance of a type from a resource, attempting to determine a type based on the resource.
+		///
+		/// @param resource Resource from which an instance of the type is constructed.
+		///
+		/// @return An instance of the class or nothing in case of failure.
+		orl::Option<Dyn> implicit_build_dyn(Resource_ resource) const;
+		
 		/// @brief Returns a reference to the only existing instance of the class
 		static Builder<Resource_, Type_>& builder();
-		
+	
 	private:
 		template<typename Base>
 		static orl::Option<Base*> cast_fn(Dyn& ptr);
@@ -138,7 +167,13 @@ namespace rttb {
 		static orl::Option<Base*> build_fn(String const& name, Resource_ resource);
 		
 		template<typename Base>
+		static orl::Option<Dyn> build_dyn_fn(String const& name, Resource_ resource);
+		
+		template<typename Base>
 		static orl::Option<Base*> implicit_build_fn(Resource_ resource);
+		
+		template<typename Base>
+		static orl::Option<Dyn> implicit_build_dyn_fn(Resource_ resource);
 		
 		Builder() = default;
 		
