@@ -59,23 +59,12 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<std::pair<size_t, Type_*> > DerivedData<Resource_, Type_>::build(const String& name, Resource_ resource) const {
+	orl::Option<Type_*> DerivedData<Resource_, Type_>::build(const String& name, Resource_ resource) const {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return type_data->build(name, std::forward<Resource_>(resource));
 		}
 		auto& build_fn{std::get<1>(data_)};
-		if(auto result{build_fn(name, std::forward<Resource_>(resource))}) {
-			return {std::make_pair(size_t{0u}, result.some())};
-		}
-		return {};
-	}
-	
-	template<typename Resource_, typename Type_>
-	orl::Option<std::pair<size_t, Type_*> > DerivedData<Resource_, Type_>::implicit_build(Resource_ resource) const {
-		if(auto type_data{std::get_if<0>(&data_)}) {
-			return type_data->implicit_build(std::forward<Resource_>(resource));
-		}
-		return {};
+		return build_fn(name, std::forward<Resource_>(resource));
 	}
 	
 	template<typename Resource_, typename Type_>
@@ -85,22 +74,52 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
+	orl::Option<Type_*> DerivedData<Resource_, Type_>::implicit_build(Resource_ resource) const {
+		if(auto type_data{std::get_if<0>(&data_)}) {
+			return type_data->implicit_build(std::forward<Resource_>(resource));
+		}
+		return {};
+	}
+	
+	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> Builder<Resource_, Type_>::cast(Dyn& ptr) const {
-		return cast_fn<Type_>(ptr);
+		if(ptr.type_id_ == type_id<Type_>()) {
+			return {reinterpret_cast<Type_*>(ptr.ptr_)};
+		}
+		for(const auto& item: derived_) {
+			if(auto result{item.cast(ptr)}) {
+				return result;
+			}
+		}
+		return {};
 	}
 	
 	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> Builder<Resource_, Type_>::build(String const& name, Resource_ resource) const {
-		if(auto result{build_fn<Type_>(name, std::forward<Resource_>(resource))}) {
-			return orl::Option<Type_*>{result.some().second};
+		if constexpr(detail::has_decode_ptr_v<Resource_, Type_>) {
+			if(names_.contains(name)) {
+				return DecodePtr<Resource_>::template decode<Type_>(resource);
+			}
+		}
+		for(const auto& item: derived_) {
+			if(auto result{item.build(name, resource)}) {
+				return result;
+			}
 		}
 		return {};
 	}
 	
 	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> Builder<Resource_, Type_>::implicit_build(Resource_ resource) const {
-		if(auto result{implicit_build_fn<Type_>(std::forward<Resource_>(resource))}) {
-			return orl::Option<Type_*>{result.some().second};
+		for(const auto& item: determine_fn_) {
+			if(auto result{item(resource)}) {
+				return build(result.some(), std::forward<Resource_>(resource));
+			}
+		}
+		for(const auto& item: derived_) {
+			if(auto result{item.implicit_build(resource)}) {
+				return result;
+			}
 		}
 		return {};
 	}
@@ -108,47 +127,26 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	template<typename Base>
 	orl::Option<Base*> Builder<Resource_, Type_>::cast_fn(Dyn& ptr) {
-		if(ptr.type_id_ == type_id<Type_>()) {
-			return {reinterpret_cast<Type_*>(ptr.ptr_)};
-		}
-		for(const auto& item: builder().derived_) {
-			if(auto result{item.cast(ptr)}) {
-				return {result.some()};
-			}
+		if(auto result{builder().cast(ptr)}) {
+			return {result.some()};
 		}
 		return {};
 	}
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<std::pair<size_t, Base*> > Builder<Resource_, Type_>::build_fn(String const& name, Resource_ resource) {
-		if constexpr(detail::has_decode_ptr_v<Resource_, Type_>) {
-			if(builder().names_.contains(name)) {
-				if(auto result{DecodePtr<Resource_>::template decode<Type_>(resource)}) {
-					return {std::make_pair(type_id<Type_>(), result.some())};
-				}
-			}
-		}
-		for(const auto& item: builder().derived_) {
-			if(auto result{item.build(name, resource)}) {
-				return {std::make_pair(result.some().first, result.some().second)};
-			}
+	orl::Option<Base*> Builder<Resource_, Type_>::build_fn(String const& name, Resource_ resource) {
+		if(auto result{builder().build(name, std::forward<Resource_>(resource))}) {
+			return {result.some()};
 		}
 		return {};
 	}
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<std::pair<size_t, Base*> > Builder<Resource_, Type_>::implicit_build_fn(Resource_ resource) {
-		for(const auto& item: builder().determine_fn_) {
-			if(auto result{item(resource)}) {
-				return build_fn<Base>(result.some(), std::forward<Resource_>(resource));
-			}
-		}
-		for(const auto& item: builder().derived_) {
-			if(auto result{item.implicit_build(resource)}) {
-				return {std::make_pair(result.some().first, result.some().second)};
-			}
+	orl::Option<Base*> Builder<Resource_, Type_>::implicit_build_fn(Resource_ resource) {
+		if(auto result{builder().implicit_build(std::forward<Resource_>(resource))}) {
+			return {result.some()};
 		}
 		return {};
 	}
