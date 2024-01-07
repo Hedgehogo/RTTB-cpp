@@ -35,6 +35,14 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
+	orl::Option<const Type_*> DerivedData<Resource_, Type_>::cast(const Dyn& ptr) const {
+		if(auto type_data{std::get_if<0>(&data_)}) {
+			return {type_data->cast(const_cast<Dyn&>(ptr)).some()};
+		}
+		return {};
+	}
+	
+	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> DerivedData<Resource_, Type_>::build(const String& name, Resource_ resource) const {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return type_data->build(name, std::forward<Resource_>(resource));

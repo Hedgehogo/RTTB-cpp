@@ -56,6 +56,8 @@ namespace rttb {
 		
 		orl::Option<Type_*> cast(Dyn& ptr) const;
 		
+		orl::Option<Type_ const*> cast(Dyn const& ptr) const;
+		
 		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
 		
 		orl::Option<Dyn> build_dyn(String const& name, Resource_ resource) const;
