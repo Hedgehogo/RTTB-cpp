@@ -84,9 +84,9 @@ namespace rttb {
 		using DetermineFn = DetermineFn<Resource_>;
 		using DetermineFnContainer = std::vector<DetermineFn>;
 		template<typename Base, typename Return>
-		using if_base_t = std::enable_if_t<std::is_base_of_v<Base, Type_>, Return>;
+		using if_base_t = std::enable_if_t<std::is_base_of_v<Base, Type_> && !std::is_same_v<Base, Type_>, Return>;
 		template<typename Derived, typename Return>
-		using if_derived_t = std::enable_if_t<std::is_base_of_v<Type_, Derived>, Return>;
+		using if_derived_t = std::enable_if_t<std::is_base_of_v<Type_, Derived> && !std::is_same_v<Type_, Derived>, Return>;
 		
 		template<typename Base>
 		if_base_t<Base, TypeData<Resource_, Base> > get_type_data();
