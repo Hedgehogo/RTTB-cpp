@@ -57,8 +57,8 @@ namespace rttb {
 			return type_data->build_dyn(name, std::forward<Resource_>(resource));
 		}
 		auto& build_fn{std::get<1>(data_)};
-		if(auto result{build_fn(name, std::forward<Resource_>(resource))}) {
-			return Dyn{result.some()};
+		for(auto& result: build_fn(name, std::forward<Resource_>(resource))) {
+			return Dyn{std::move(result)};
 		}
 		return {};
 	}
@@ -119,8 +119,8 @@ namespace rttb {
 			return {reinterpret_cast<Type_*>(ptr.ptr_)};
 		}
 		for(const auto& item: derived_) {
-			if(auto result{item.cast(ptr)}) {
-				return result;
+			for(auto result: item.cast(ptr)) {
+				return {result};
 			}
 		}
 		return {};
@@ -134,8 +134,8 @@ namespace rttb {
 			}
 		}
 		for(const auto& item: derived_) {
-			if(auto result{item.build(name, resource)}) {
-				return result;
+			for(auto result: item.build(name, resource)) {
+				return {result};
 			}
 		}
 		return {};
@@ -145,14 +145,14 @@ namespace rttb {
 	orl::Option<Dyn> Builder<Resource_, Type_>::build_dyn(const String& name, Resource_ resource) const {
 		if constexpr(detail::has_decode_ptr_v<Resource_, Type_>) {
 			if(names_.contains(name)) {
-				if(auto result{DecodePtr<Resource_>::template decode<Type_>(resource)}) {
-					return Dyn{result.some()};
+				for(auto& result: DecodePtr<Resource_>::template decode<Type_>(resource)) {
+					return Dyn{std::move(result)};
 				}
 			}
 		}
 		for(const auto& item: derived_) {
-			if(auto result{item.build_dyn(name, resource)}) {
-				return result;
+			for(auto& result: item.build_dyn(name, resource)) {
+				return {std::move(result)};
 			}
 		}
 		return {};
@@ -161,13 +161,13 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> Builder<Resource_, Type_>::implicit_build(Resource_ resource) const {
 		for(const auto& item: determine_fn_) {
-			if(auto result{item(resource)}) {
-				return build(result.some(), std::forward<Resource_>(resource));
+			for(auto& result: item(resource)) {
+				return build(result, std::forward<Resource_>(resource));
 			}
 		}
 		for(const auto& item: derived_) {
-			if(auto result{item.implicit_build(resource)}) {
-				return result;
+			for(auto& result: item.implicit_build(resource)) {
+				return {std::move(result)};
 			}
 		}
 		return {};
@@ -176,13 +176,13 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	orl::Option<Dyn> Builder<Resource_, Type_>::implicit_build_dyn(Resource_ resource) const {
 		for(const auto& item: determine_fn_) {
-			if(auto result{item(resource)}) {
-				return build_dyn(result.some(), std::forward<Resource_>(resource));
+			for(auto& result: item(resource)) {
+				return build_dyn(result, std::forward<Resource_>(resource));
 			}
 		}
 		for(const auto& item: derived_) {
-			if(auto result{item.implicit_build_dyn(resource)}) {
-				return result;
+			for(auto& result: item.implicit_build_dyn(resource)) {
+				return {std::move(result)};
 			}
 		}
 		return {};
@@ -197,8 +197,8 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	template<typename Base>
 	orl::Option<Base*> Builder<Resource_, Type_>::cast_fn(Dyn& ptr) {
-		if(auto result{builder().cast(ptr)}) {
-			return {result.some()};
+		for(auto result: builder().cast(ptr)) {
+			return {result};
 		}
 		return {};
 	}
@@ -206,8 +206,8 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	template<typename Base>
 	orl::Option<Base*> Builder<Resource_, Type_>::build_fn(String const& name, Resource_ resource) {
-		if(auto result{builder().build(name, std::forward<Resource_>(resource))}) {
-			return {result.some()};
+		for(auto result: builder().build(name, std::forward<Resource_>(resource))) {
+			return {result};
 		}
 		return {};
 	}
@@ -221,8 +221,8 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	template<typename Base>
 	orl::Option<Base*> Builder<Resource_, Type_>::implicit_build_fn(Resource_ resource) {
-		if(auto result{builder().implicit_build(std::forward<Resource_>(resource))}) {
-			return {result.some()};
+		for(auto result: builder().implicit_build(std::forward<Resource_>(resource))) {
+			return {result};
 		}
 		return {};
 	}

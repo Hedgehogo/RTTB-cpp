@@ -73,8 +73,8 @@ public:
 	}
 	
 	virtual ~TemplateBase() {
-		if(part) {
-			delete part.some();
+		for(auto ptr: part) {
+			delete ptr;
 		}
 	}
 
