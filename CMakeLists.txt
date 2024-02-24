@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.24)
 project(RTTB_cpp)
+set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 
-set(CMAKE_CXX_STANDARD 17)
+option(RTTB_ENABLE_INSTALL "Enable install rule" ON)
 
 set(ABSL_PROPAGATE_CXX_STD ON)
-
-set(ABSL_ENABLE_INSTALL ON)
+set(ABSL_ENABLE_INSTALL ${RTTB_ENABLE_INSTALL})
 
 FetchContent_Declare(
         option_result_cpp
@@ -53,16 +53,18 @@ target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_CURRENT_LIST_DIR
 
 target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_CURRENT_LIST_DIR}/test)
 
-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/RTTB DESTINATION ${CMAKE_INSTALL_PREFIX}/include PATTERN "*.hpp")
+if (RTTB_ENABLE_INSTALL)
+    install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/RTTB DESTINATION ${CMAKE_INSTALL_PREFIX}/include PATTERN "*.hpp")
 
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
-        )
+    install(TARGETS ${PROJECT_NAME}
+            EXPORT ${PROJECT_NAME}
+            LIBRARY DESTINATION lib
+            PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
+    )
 
-install(EXPORT ${PROJECT_NAME}
-        FILE ${PROJECT_NAME}Config.cmake
-        NAMESPACE ${PROJECT_NAME}::
-        DESTINATION lib/cmake/${PROJECT_NAME}
-        )
+    install(EXPORT ${PROJECT_NAME}
+            FILE ${PROJECT_NAME}Config.cmake
+            NAMESPACE ${PROJECT_NAME}::
+            DESTINATION lib/cmake/${PROJECT_NAME}
+    )
+endif ()
