@@ -8,7 +8,7 @@ namespace rttb {
 		destroy_fn_(destroy<T>) {
 	}
 	
-	template<typename T>
+	template<typename T, typename>
 	Dyn::Dyn(T* ptr) :
 		ptr_(reinterpret_cast<void*>(ptr)),
 		type_id_(type_id<T>()),

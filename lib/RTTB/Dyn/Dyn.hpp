@@ -16,6 +16,10 @@ namespace rttb {
 		template<typename T>
 		Dyn(T&& object);
 		
+		/// @note Use only when pointer stability is required. Use only with a pointer to the final class.
+		template<typename T, typename = std::enable_if_t<!std::is_abstract_v<T> > >
+		Dyn(T* ptr);
+		
 		Dyn(Dyn const& other) = delete;
 		
 		Dyn(Dyn&& other);
@@ -29,9 +33,6 @@ namespace rttb {
 		Dyn& operator=(Dyn&& other);
 		
 	private:
-		template<typename T>
-		Dyn(T* ptr);
-		
 		template<typename T>
 		static void destroy(void* object);
 		
