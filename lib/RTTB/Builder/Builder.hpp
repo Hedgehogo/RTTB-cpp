@@ -3,7 +3,7 @@
 #include <vector>
 #include <variant>
 #include <functional>
-#include <absl/container/flat_hash_set.h>
+#include <type-name/type-name.hpp>
 #include <absl/container/flat_hash_map.h>
 
 #include <RTTB/Cast/Cast.hpp>
@@ -188,7 +188,6 @@ namespace rttb {
 		const Builder& operator=(const Builder&) const = delete;
 		
 		DerivedContainer derived_;
-		NamesContainer names_;
 		DetermineFnContainer determine_fn_;
 	};
 }

@@ -12,31 +12,38 @@ set(ABSL_ENABLE_INSTALL ${RTTB_ENABLE_INSTALL})
 FetchContent_Declare(
         option_result_cpp
         GIT_REPOSITORY https://github.com/Hedgehogo/option-result-cpp.git
-        GIT_TAG        main
+        GIT_TAG main
         FIND_PACKAGE_ARGS NAMES option_result_cpp
 )
 
 FetchContent_Declare(
         abseil
         GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-        GIT_TAG        lts_2023_01_25
+        GIT_TAG lts_2023_01_25
         FIND_PACKAGE_ARGS NAMES absl
 )
 
 FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest
-        GIT_TAG        v1.13.0
+        GIT_TAG v1.13.0
         FIND_PACKAGE_ARGS NAMES GTest
 )
 
-FetchContent_MakeAvailable(option_result_cpp abseil googletest)
+FetchContent_Declare(
+        type_name_cpp
+        GIT_REPOSITORY https://github.com/Hedgehogo/type-name-cpp
+        GIT_TAG master
+        FIND_PACKAGE_ARGS NAMES type_name_cpp
+)
+
+FetchContent_MakeAvailable(option_result_cpp type_name_cpp googletest)
 
 file(GLOB_RECURSE src "lib/*.hpp" "lib/*.cpp")
 
 add_library(${PROJECT_NAME} ${src})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC option_result_cpp absl::flat_hash_set)
+target_link_libraries(${PROJECT_NAME} PUBLIC option_result_cpp type_name_cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib>
@@ -60,11 +67,11 @@ if (RTTB_ENABLE_INSTALL)
             EXPORT ${PROJECT_NAME}
             LIBRARY DESTINATION lib
             PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
-    )
+            )
 
     install(EXPORT ${PROJECT_NAME}
             FILE ${PROJECT_NAME}Config.cmake
             NAMESPACE ${PROJECT_NAME}::
             DESTINATION lib/cmake/${PROJECT_NAME}
-    )
+            )
 endif ()

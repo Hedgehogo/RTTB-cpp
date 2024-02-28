@@ -88,7 +88,7 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	typename Builder<Resource_, Type_>::NamesContainer const& Builder<Resource_, Type_>::get_names() {
-		return names_;
+		return tnl::Storage<Type_>::storage().names();
 	}
 	
 	template<typename Resource_, typename Type_>
@@ -105,7 +105,7 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	void Builder<Resource_, Type_>::add_name(String&& name) {
-		names_.insert(name);
+		tnl::Storage<Type_>::storage().add_name(std::move(name));
 	}
 	
 	template<typename Resource_, typename Type_>
@@ -129,7 +129,7 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	orl::Option<Type_*> Builder<Resource_, Type_>::build(String const& name, Resource_ resource) const {
 		if constexpr(detail::has_decode_ptr_v<Resource_, Type_>) {
-			if(names_.contains(name)) {
+			if(tnl::Storage<Type_>::storage().names().contains(name)) {
 				return DecodePtr<Resource_>::template decode<Type_>(resource);
 			}
 		}
@@ -144,7 +144,7 @@ namespace rttb {
 	template<typename Resource_, typename Type_>
 	orl::Option<Dyn> Builder<Resource_, Type_>::build_dyn(const String& name, Resource_ resource) const {
 		if constexpr(detail::has_decode_ptr_v<Resource_, Type_>) {
-			if(names_.contains(name)) {
+			if(tnl::Storage<Type_>::storage().names().contains(name)) {
 				for(auto& result: DecodePtr<Resource_>::template decode<Type_>(resource)) {
 					return Dyn{std::move(result)};
 				}
