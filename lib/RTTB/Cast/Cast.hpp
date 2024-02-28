@@ -9,7 +9,7 @@ namespace rttb {
 	/// @tparam Derived_ Derived class.
 	template<typename Base_, typename Derived_>
 	struct Cast {
-		static Base_* cast(void* derived);
+		static auto cast(void* derived) -> Base_*;
 	};
 }
 

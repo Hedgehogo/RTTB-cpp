@@ -54,17 +54,17 @@ namespace rttb {
 		
 		DerivedData(BuildFn build_fn);
 		
-		orl::Option<Type_*> cast(Dyn& ptr) const;
+		auto cast(Dyn& ptr) const -> orl::Option<Type_*>;
 		
-		orl::Option<Type_ const*> cast(Dyn const& ptr) const;
+		auto cast(Dyn const& ptr) const -> orl::Option<Type_ const*>;
 		
-		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
+		auto build(String const& name, Resource_ resource) const -> orl::Option<Type_*>;
 		
-		orl::Option<Dyn> build_dyn(String const& name, Resource_ resource) const;
+		auto build_dyn(String const& name, Resource_ resource) const -> orl::Option<Dyn>;
 		
-		orl::Option<Type_*> implicit_build(Resource_ resource) const;
+		auto implicit_build(Resource_ resource) const -> orl::Option<Type_*>;
 		
-		orl::Option<Dyn> implicit_build_dyn(Resource_ resource) const;
+		auto implicit_build_dyn(Resource_ resource) const -> orl::Option<Dyn>;
 	
 	protected:
 		std::variant<TypeData, BuildFn> data_;
@@ -89,18 +89,18 @@ namespace rttb {
 		using if_derived_t = std::enable_if_t<std::is_base_of_v<Type_, Derived> && !std::is_same_v<Type_, Derived>, Return>;
 		
 		template<typename Base>
-		if_base_t<Base, TypeData<Resource_, Base> > get_type_data();
+		auto get_type_data() -> if_base_t<Base, TypeData<Resource_, Base> >;
 		
 		/// @brief Gets the set of names associated with the type
 		///
 		/// @return Set of names.
-		NamesContainer const& get_names();
+		auto get_names() -> NamesContainer const&;
 		
 		/// @brief Adds information about the existence of the derived type.
 		///
 		/// @tparam Derived Derived type.
 		template<typename Derived>
-		if_derived_t<Derived, void> add_type();
+		auto add_type() -> if_derived_t<Derived, void>;
 		
 		/// @brief Adds a function that can construct a type.
 		///
@@ -109,24 +109,24 @@ namespace rttb {
 		/// It should return nothing when the first argument is the name of the added type.
 		///
 		/// @param build_fn Construction function.
-		void add_fn(BuildFn build_fn);
+		auto add_fn(BuildFn build_fn) -> void;
 		
 		/// @brief Adds an additional name to the type.
 		///
 		/// @param name Additional name.
-		void add_name(String&& name);
+		auto add_name(String&& name) -> void;
 		
 		/// @brief Adds a function that attempts to determine the type name from the resource.
 		///
 		/// @param determine_fn Determine function.
-		void add_determine(DetermineFn determine_fn);
+		auto add_determine(DetermineFn determine_fn) -> void;
 		
 		/// @brief Performs a type check and returns a pointer if the check succeeds.
 		///
 		/// @param ptr Dyn pointer to an object.
 		///
 		/// @return Pointer to an object or nothing.
-		orl::Option<Type_*> cast(Dyn& ptr) const;
+		auto cast(Dyn& ptr) const -> orl::Option<Type_*>;
 		
 		/// @brief Constructs an instance of the type by type name from the resource.
 		///
@@ -134,7 +134,7 @@ namespace rttb {
 		/// @param resource Resource from which an instance of the type is constructed.
 		///
 		/// @return An instance of the class or nothing in case of failure.
-		orl::Option<Type_*> build(String const& name, Resource_ resource) const;
+		auto build(String const& name, Resource_ resource) const -> orl::Option<Type_*>;
 		
 		/// @brief Constructs an instance of the type by type name from the resource.
 		///
@@ -142,40 +142,40 @@ namespace rttb {
 		/// @param resource Resource from which an instance of the type is constructed.
 		///
 		/// @return An instance of the class or nothing in case of failure.
-		orl::Option<Dyn> build_dyn(String const& name, Resource_ resource) const;
+		auto build_dyn(String const& name, Resource_ resource) const -> orl::Option<Dyn>;
 		
 		/// @brief Constructs an instance of a type from a resource, attempting to determine a type based on the resource.
 		///
 		/// @param resource Resource from which an instance of the type is constructed.
 		///
 		/// @return An instance of the class or nothing in case of failure.
-		orl::Option<Type_*> implicit_build(Resource_ resource) const;
+		auto implicit_build(Resource_ resource) const -> orl::Option<Type_*>;
 		
 		/// @brief Constructs an instance of a type from a resource, attempting to determine a type based on the resource.
 		///
 		/// @param resource Resource from which an instance of the type is constructed.
 		///
 		/// @return An instance of the class or nothing in case of failure.
-		orl::Option<Dyn> implicit_build_dyn(Resource_ resource) const;
+		auto implicit_build_dyn(Resource_ resource) const -> orl::Option<Dyn>;
 		
 		/// @brief Returns a reference to the only existing instance of the class
-		static Builder<Resource_, Type_>& builder();
+		static auto builder() -> Builder<Resource_, Type_>&;
 	
 	private:
 		template<typename Base>
-		static orl::Option<Base*> cast_fn(Dyn& ptr);
+		static auto cast_fn(Dyn& ptr) -> orl::Option<Base*>;
 		
 		template<typename Base>
-		static orl::Option<Base*> build_fn(String const& name, Resource_ resource);
+		static auto build_fn(String const& name, Resource_ resource) -> orl::Option<Base*>;
 		
 		template<typename Base>
-		static orl::Option<Dyn> build_dyn_fn(String const& name, Resource_ resource);
+		static auto build_dyn_fn(String const& name, Resource_ resource) -> orl::Option<Dyn>;
 		
 		template<typename Base>
-		static orl::Option<Base*> implicit_build_fn(Resource_ resource);
+		static auto implicit_build_fn(Resource_ resource) -> orl::Option<Base*>;
 		
 		template<typename Base>
-		static orl::Option<Dyn> implicit_build_dyn_fn(Resource_ resource);
+		static auto implicit_build_dyn_fn(Resource_ resource) -> orl::Option<Dyn>;
 		
 		Builder() = default;
 		
@@ -183,9 +183,9 @@ namespace rttb {
 		
 		Builder(Builder&&) = delete;
 		
-		Builder& operator=(const Builder&) = delete;
+		auto operator=(const Builder&) -> Builder& = delete;
 		
-		const Builder& operator=(const Builder&) const = delete;
+		auto operator=(const Builder&) const -> Builder const& = delete;
 		
 		DerivedContainer derived_;
 		DetermineFnContainer determine_fn_;

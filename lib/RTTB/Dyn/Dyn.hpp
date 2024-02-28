@@ -26,17 +26,17 @@ namespace rttb {
 		
 		~Dyn();
 		
-		size_t get_type_id() const;
+		auto get_type_id() const -> size_t;
 		
-		Dyn& operator=(Dyn const& other) = delete;
+		auto operator=(Dyn const& other) -> Dyn& = delete;
 		
-		Dyn& operator=(Dyn&& other);
+		auto operator=(Dyn&& other) -> Dyn&;
 		
 	private:
 		template<typename T>
-		static void destroy(void* object);
+		static auto destroy(void* object) -> void;
 		
-		static void not_destroy(void* object);
+		static auto not_destroy(void* object) -> void;
 		
 		template<typename Resource_, typename Type_>
 		friend class DerivedData;

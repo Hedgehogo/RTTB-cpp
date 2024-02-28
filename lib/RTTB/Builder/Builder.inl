@@ -27,7 +27,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> DerivedData<Resource_, Type_>::cast(Dyn& ptr) const {
+	auto DerivedData<Resource_, Type_>::cast(Dyn& ptr) const -> orl::Option<Type_*> {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return type_data->cast(ptr);
 		}
@@ -35,7 +35,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<const Type_*> DerivedData<Resource_, Type_>::cast(const Dyn& ptr) const {
+	auto DerivedData<Resource_, Type_>::cast(Dyn const& ptr) const -> orl::Option<Type_ const*> {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return {type_data->cast(const_cast<Dyn&>(ptr)).some()};
 		}
@@ -43,7 +43,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> DerivedData<Resource_, Type_>::build(const String& name, Resource_ resource) const {
+	auto DerivedData<Resource_, Type_>::build(String const& name, Resource_ resource) const -> orl::Option<Type_*> {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return type_data->build(name, std::forward<Resource_>(resource));
 		}
@@ -52,7 +52,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Dyn> DerivedData<Resource_, Type_>::build_dyn(const String& name, Resource_ resource) const {
+	auto DerivedData<Resource_, Type_>::build_dyn(String const& name, Resource_ resource) const -> orl::Option<Dyn> {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return type_data->build_dyn(name, std::forward<Resource_>(resource));
 		}
@@ -64,7 +64,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> DerivedData<Resource_, Type_>::implicit_build(Resource_ resource) const {
+	auto DerivedData<Resource_, Type_>::implicit_build(Resource_ resource) const -> orl::Option<Type_*> {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return type_data->implicit_build(std::forward<Resource_>(resource));
 		}
@@ -72,7 +72,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Dyn> DerivedData<Resource_, Type_>::implicit_build_dyn(Resource_ resource) const {
+	auto DerivedData<Resource_, Type_>::implicit_build_dyn(Resource_ resource) const -> orl::Option<Dyn> {
 		if(auto type_data{std::get_if<0>(&data_)}) {
 			return type_data->implicit_build_dyn(std::forward<Resource_>(resource));
 		}
@@ -87,34 +87,33 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	typename Builder<Resource_, Type_>::NamesContainer const& Builder<Resource_, Type_>::get_names() {
+	auto Builder<Resource_, Type_>::get_names() -> NamesContainer const& {
 		return tnl::Storage<Type_>::storage().names();
 	}
 	
 	template<typename Resource_, typename Type_>
 	template<typename Derived>
-	typename Builder<Resource_, Type_>::template if_derived_t<Derived, void>
-	Builder<Resource_, Type_>::add_type() {
+	auto Builder<Resource_, Type_>::add_type() -> if_derived_t<Derived, void> {
 		derived_.push_back(DerivedData{Builder<Resource_, Derived>::builder().template get_type_data<Type_>()});
 	}
 	
 	template<typename Resource_, typename Type_>
-	void Builder<Resource_, Type_>::add_fn(BuildFn build_fn) {
+	auto Builder<Resource_, Type_>::add_fn(BuildFn build_fn) -> void {
 		derived_.push_back(DerivedData{std::move(build_fn)});
 	}
 	
 	template<typename Resource_, typename Type_>
-	void Builder<Resource_, Type_>::add_name(String&& name) {
+	auto Builder<Resource_, Type_>::add_name(String&& name) -> void {
 		tnl::Storage<Type_>::storage().add_name(std::move(name));
 	}
 	
 	template<typename Resource_, typename Type_>
-	void Builder<Resource_, Type_>::add_determine(DetermineFn determine_fn) {
+	auto Builder<Resource_, Type_>::add_determine(DetermineFn determine_fn) -> void {
 		determine_fn_.push_back(determine_fn);
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> Builder<Resource_, Type_>::cast(Dyn& ptr) const {
+	auto Builder<Resource_, Type_>::cast(Dyn& ptr) const -> orl::Option<Type_*> {
 		if(ptr.type_id_ == type_id<Type_>()) {
 			return {reinterpret_cast<Type_*>(ptr.ptr_)};
 		}
@@ -127,7 +126,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> Builder<Resource_, Type_>::build(String const& name, Resource_ resource) const {
+	auto Builder<Resource_, Type_>::build(String const& name, Resource_ resource) const -> orl::Option<Type_*> {
 		if constexpr(detail::has_decode_ptr_v<Resource_, Type_>) {
 			if(tnl::Storage<Type_>::storage().names().contains(name)) {
 				return DecodePtr<Resource_>::template decode<Type_>(resource);
@@ -142,7 +141,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Dyn> Builder<Resource_, Type_>::build_dyn(const String& name, Resource_ resource) const {
+	auto Builder<Resource_, Type_>::build_dyn(String const& name, Resource_ resource) const -> orl::Option<Dyn> {
 		if constexpr(detail::has_decode_ptr_v<Resource_, Type_>) {
 			if(tnl::Storage<Type_>::storage().names().contains(name)) {
 				for(auto& result: DecodePtr<Resource_>::template decode<Type_>(resource)) {
@@ -159,7 +158,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Type_*> Builder<Resource_, Type_>::implicit_build(Resource_ resource) const {
+	auto Builder<Resource_, Type_>::implicit_build(Resource_ resource) const -> orl::Option<Type_*> {
 		for(const auto& item: determine_fn_) {
 			for(auto& result: item(resource)) {
 				return build(result, std::forward<Resource_>(resource));
@@ -174,7 +173,7 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	orl::Option<Dyn> Builder<Resource_, Type_>::implicit_build_dyn(Resource_ resource) const {
+	auto Builder<Resource_, Type_>::implicit_build_dyn(Resource_ resource) const -> orl::Option<Dyn> {
 		for(const auto& item: determine_fn_) {
 			for(auto& result: item(resource)) {
 				return build_dyn(result, std::forward<Resource_>(resource));
@@ -189,14 +188,14 @@ namespace rttb {
 	}
 	
 	template<typename Resource_, typename Type_>
-	Builder<Resource_, Type_>& Builder<Resource_, Type_>::builder() {
+	auto Builder<Resource_, Type_>::builder() -> Builder<Resource_, Type_>& {
 		static Builder<Resource_, Type_> result{};
 		return result;
 	}
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<Base*> Builder<Resource_, Type_>::cast_fn(Dyn& ptr) {
+	auto Builder<Resource_, Type_>::cast_fn(Dyn& ptr) -> orl::Option<Base*> {
 		for(auto result: builder().cast(ptr)) {
 			return {result};
 		}
@@ -205,7 +204,7 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<Base*> Builder<Resource_, Type_>::build_fn(String const& name, Resource_ resource) {
+	auto Builder<Resource_, Type_>::build_fn(String const& name, Resource_ resource) -> orl::Option<Base*> {
 		for(auto result: builder().build(name, std::forward<Resource_>(resource))) {
 			return {result};
 		}
@@ -214,13 +213,13 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<Dyn> Builder<Resource_, Type_>::build_dyn_fn(const String& name, Resource_ resource) {
+	auto Builder<Resource_, Type_>::build_dyn_fn(String const& name, Resource_ resource) -> orl::Option<Dyn> {
 		return builder().build_dyn(name, std::forward<Resource_>(resource));
 	}
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<Base*> Builder<Resource_, Type_>::implicit_build_fn(Resource_ resource) {
+	auto Builder<Resource_, Type_>::implicit_build_fn(Resource_ resource) -> orl::Option<Base*> {
 		for(auto result: builder().implicit_build(std::forward<Resource_>(resource))) {
 			return {result};
 		}
@@ -229,7 +228,7 @@ namespace rttb {
 	
 	template<typename Resource_, typename Type_>
 	template<typename Base>
-	orl::Option<Dyn> Builder<Resource_, Type_>::implicit_build_dyn_fn(Resource_ resource) {
+	auto Builder<Resource_, Type_>::implicit_build_dyn_fn(Resource_ resource) -> orl::Option<Dyn> {
 		return builder().implicit_build_dyn(std::forward<Resource_>(resource));
 	}
 }

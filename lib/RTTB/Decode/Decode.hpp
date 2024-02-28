@@ -13,7 +13,7 @@ namespace rttb {
 	/// The specialization of this trait must set a specific value to Resource_, and must contain a function with a similar signature:
 	///	@code
 	/// template<typename Type>
-	/// DecodePtrReturn< <Decode>, <Resource>, Type*> decode(<Resource>);
+	/// auto decode(<Resource>) -> DecodePtrReturn< <Decode>, <Resource>, Type*>;
 	/// @endcode
 	///
 	/// Example of specialization:
@@ -25,7 +25,7 @@ namespace rttb {
 	/// 	template<>
 	///		struct DecodePtr<Node const&> {
 	///			template<typename Type>
-	/// 		DecodePtrReturn<::Decode, Node const&, Type*> decode(Node const& node) {
+	/// 		auto decode(Node const& node) -> DecodePtrReturn<::Decode, Node const&, Type*> {
 	///				return Decode<Type>::decode(node);
 	///			}
 	///		};
@@ -43,7 +43,7 @@ namespace rttb {
 				return {};
 			}
 			
-			[[maybe_unused]] static std::false_type has_decode_ptr(...) {
+			[[maybe_unused]] static auto has_decode_ptr(...) -> std::false_type {
 				return {};
 			}
 		};
@@ -61,7 +61,7 @@ namespace rttb {
 				return {};
 			}
 			
-			[[maybe_unused]] static std::false_type has_decode(...) {
+			[[maybe_unused]] static auto has_decode(...) -> std::false_type {
 				return {};
 			}
 		};

@@ -16,7 +16,7 @@ namespace rttb {
 	}
 	
 	template<typename T>
-	void Dyn::destroy(void* object) {
+	auto Dyn::destroy(void* object) -> void {
 		delete reinterpret_cast<T*>(object);
 	}
 }

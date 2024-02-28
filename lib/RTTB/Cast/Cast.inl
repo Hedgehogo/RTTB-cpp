@@ -2,7 +2,7 @@
 
 namespace rttb {
 	template<typename Base_, typename Derived_>
-	Base_* Cast<Base_, Derived_>::cast(void* derived) {
+	auto Cast<Base_, Derived_>::cast(void* derived) -> Base_* {
 		return reinterpret_cast<Derived_*>(derived);
 	}
 }

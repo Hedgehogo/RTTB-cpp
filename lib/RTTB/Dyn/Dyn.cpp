@@ -9,7 +9,7 @@ namespace rttb {
 		destroy_fn_(ptr_);
 	}
 	
-	Dyn& Dyn::operator=(Dyn&& other) {
+	auto Dyn::operator=(Dyn&& other) -> Dyn& {
 		ptr_ = other.ptr_;
 		type_id_ = other.type_id_;
 		destroy_fn_ = other.destroy_fn_;
@@ -17,10 +17,10 @@ namespace rttb {
 		return *this;
 	}
 	
-	void Dyn::not_destroy(void* object) {
+	auto Dyn::not_destroy(void* object) -> void {
 	}
 	
-	size_t Dyn::get_type_id() const {
+	auto Dyn::get_type_id() const -> size_t {
 		return type_id_;
 	}
 }
